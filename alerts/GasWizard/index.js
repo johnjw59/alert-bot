@@ -46,7 +46,7 @@ function GasWizard() {
           // date before, only continue if the price has changed.
           if ((data.date > old_data.date) || ((data.date == old_data.date) && (data.price != old_data.price))) {
             alertEvents.emitAlert(
-              `Gas prediction for ${moment(data.date, 'X').format('LL')}: (${(change > 0) ? '↑' : '↓'} ${change}) $${data.price}/L`
+              `Gas prediction for ${moment(data.date, 'X').format('LL')}: (${($change_elem.hasClass('pd-down')) ? '↓' : '↑'} ${change}) $${data.price}/L`
             );
           }
         }
