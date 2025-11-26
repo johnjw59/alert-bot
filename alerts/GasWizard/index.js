@@ -9,7 +9,7 @@ const store = require('store2');
 
 function GasWizard() {
   // Daily at 12:00pm.
-  const schedule_rule = '0 30 10 * * *';
+  const schedule_rule = '0 30 12 * * *';
 
   const job = schedule.scheduleJob(schedule_rule, () => {
     axios.get('https://gaswizard.ca/gas-prices/vancouver/')
