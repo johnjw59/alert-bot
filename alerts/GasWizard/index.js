@@ -17,20 +17,20 @@ function GasWizard() {
         const $ = cheerio.load(data);
 
         const $row = $('ul.single-city-prices li').first();
-        const $price_elem = $row.find('.fueltype .fuelprice').first();
+        const $price_elem = $row.find('.fueltype .fuelprice .fuel-price-value').first();
         const $change_elem = $price_elem.find('.price-direction');
 
-        if (!$change_elem.hasClass('pd-nc')) {
+        const old_data = store.get('gaswizard.latest', { date: -1 });
+
+        if (!$change_elem.hasClass('pd-nc') || (old_data.date == -1)) {
           const date = parseInt(moment(
             $row.find('.datetext').text().trim(),
             'MMM D, YYYY'
           ).format('X'));
 
-          let price = $price_elem.contents()[0].nodeValue.trim();
-          price = price.substring(0, price.length - 1);
-
-          let change = $change_elem.text();
-          change = change.substring(1, change.length - 1);
+          const price = $price_elem.text();
+          const change = $change_elem.text()
+            .substring(1, change.length - 1);
 
           const data = {
             price: price,
@@ -38,7 +38,6 @@ function GasWizard() {
           };
 
           // Keep track of our data.
-          const old_data = store.get('gaswizard.latest', { date: -1 });
           store.set('gaswizard.latest', data);
 
           // Send the alert!
@@ -50,6 +49,10 @@ function GasWizard() {
             );
           }
         }
+      })
+      .catch((error) => {
+        // @TODO - send errors as a DM or just to a seperate channel on discord.
+        console.error(error);
       });
   });
 }
