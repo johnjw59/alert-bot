@@ -29,8 +29,8 @@ function GasWizard() {
           ).format('X'));
 
           const price = $price_elem.find('.fuel-price-value').text();
-          const change = $change_elem.find('.price-text').text()
-            .substring(1, change.length - 1);
+          let change = $change_elem.find('.price-text').text()
+          change = change.substring(1, change.length - 1);
 
           const data = {
             price: price,
