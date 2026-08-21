@@ -17,7 +17,7 @@ function GasWizard() {
         const $ = cheerio.load(data);
 
         const $row = $('ul.single-city-prices li').first();
-        const $price_elem = $row.find('.fueltype .fuelprice .fuel-price-value').first();
+        const $price_elem = $row.find('.fueltype .fuelprice').first();
         const $change_elem = $price_elem.find('.price-direction');
 
         const old_data = store.get('gaswizard.latest', { date: -1 });
@@ -28,8 +28,8 @@ function GasWizard() {
             'MMM D, YYYY'
           ).format('X'));
 
-          const price = $price_elem.text();
-          const change = $change_elem.text()
+          const price = $price_elem.find('.fuel-price-value').text();
+          const change = $change_elem.find('.price-text').text()
             .substring(1, change.length - 1);
 
           const data = {
