@@ -8,7 +8,7 @@ const schedule = require('node-schedule');
 const store = require('store2');
 
 function GasWizard() {
-  // Daily at 12:00pm.
+  // Daily at noon-ish or something.
   const schedule_rule = '0 30 12 * * *';
 
   const job = schedule.scheduleJob(schedule_rule, () => {
