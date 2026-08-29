@@ -57,6 +57,9 @@ typings/
 # dotenv environment variables file
 .env
 
+# Local agent context (not for remote)
+AGENTS.md
+
 # Don't keep database files
 data/*
 !data/.gitkeep
