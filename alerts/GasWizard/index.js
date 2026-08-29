@@ -12,6 +12,8 @@ function GasWizard() {
   const schedule_rule = '0 30 12 * * *';
 
   const job = schedule.scheduleJob(schedule_rule, () => {
+    console.log('[GasWizard] check triggered');
+
     axios.get('https://gaswizard.ca/gas-prices/vancouver/')
       .then(({ data }) => {
         const $ = cheerio.load(data);
@@ -20,39 +22,50 @@ function GasWizard() {
         const $price_elem = $row.find('.fueltype .fuelprice').first();
         const $change_elem = $price_elem.find('.price-direction');
 
+        // Scrape the date from the page.
+        const date = parseInt(moment(
+          $row.find('.datetext').text().trim(),
+          'MMM D, YYYY'
+        ).format('X'));
+
+        const price = $price_elem.find('.fuel-price-value').text();
+
+        const data = {
+          price: price,
+          date: date,
+        };
+
         const old_data = store.get('gaswizard.latest', { date: -1 });
 
-        if (!$change_elem.hasClass('pd-nc') || (old_data.date == -1)) {
-          const date = parseInt(moment(
-            $row.find('.datetext').text().trim(),
-            'MMM D, YYYY'
-          ).format('X'));
+        console.log('[GasWizard] new data', data, 'old data', old_data);
 
-          const price = $price_elem.find('.fuel-price-value').text();
-          let change = $change_elem.find('.price-text').text()
-          change = change.substring(1, change.length - 1);
+        // Update our stored data.
+        store.set('gaswizard.latest', data);
 
-          const data = {
-            price: price,
-            date: date,
-          };
+        // Only send an alert if the price has changed.
+        if ((old_data.date == -1) || (data.price != old_data.price)) {
+          let change;
 
-          // Keep track of our data.
-          store.set('gaswizard.latest', data);
-
-          // Send the alert!
-          // But make sure we're looking at a new date. If we've seen this
-          // date before, only continue if the price has changed.
-          if ((data.date > old_data.date) || ((data.date == old_data.date) && (data.price != old_data.price))) {
-            alertEvents.emitAlert(
-              `Gas prediction for ${moment(data.date, 'X').format('LL')}: (${($change_elem.hasClass('pd-down')) ? '↓' : '↑'} ${change}) $${data.price}/L`
-            );
+          // Determine the change in price.
+          // If we have no old data, use the change element from the page.
+          if (old_data.date == -1) {
+            change = parseInt($change_elem.find('.price-text').text().replace('¢', ''), 10);
           }
+          else {
+            change = Math.round(parseFloat(data.price) - parseFloat(old_data.price));
+          }
+
+          alertEvents.emitAlert(
+            `Gas prediction for ${moment(data.date, 'X').format('LL')}: (${change < 0 ? '↓' : '↑'} ${Math.abs(change)}¢) $${data.price}/L`
+          );
+          console.log('[GasWizard] alert sent');
+        }
+        else {
+          console.log('[GasWizard] no price change found.');
         }
       })
       .catch((error) => {
-        // @TODO - send errors as a DM or just to a seperate channel on discord.
-        console.error(error);
+        console.error('[GasWizard] check failed:', error);
       });
   });
 }
