@@ -15,8 +15,8 @@ function GasWizard() {
     console.log('[GasWizard] check triggered');
 
     axios.get('https://gaswizard.ca/gas-prices/vancouver/')
-      .then(({ data }) => {
-        const $ = cheerio.load(data);
+      .then(({ page }) => {
+        const $ = cheerio.load(page);
 
         const $row = $('ul.single-city-prices li').first();
         const $price_elem = $row.find('.fueltype .fuelprice').first();
